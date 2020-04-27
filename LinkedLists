@@ -1,0 +1,213 @@
+// Rabiya Sharieff
+
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+struct Node {
+    Node(int data = 0, Node* next = nullptr) : data(data), next(next) {}
+    int data;
+    Node* next;
+};
+
+// listAddHead: adds a data item to the beginning of a [possibly empty] list
+void listAddHead(Node*& headPtr, int entry) {
+    headPtr = new Node(entry, headPtr);
+}
+
+// listClear: frees up all the nodes in a list
+void listClear(Node*& headPtr) {
+    while (headPtr) {
+        Node* next = headPtr->next;
+        delete headPtr;
+        headPtr = next;
+    }
+}
+
+void splice(Node*& origHead, Node*& spliceHead) {
+    Node* splicePtr= origHead;
+    Node* splicePtr2 = spliceHead;
+    if (splicePtr2 != nullptr) {
+        if (splicePtr != nullptr){
+            Node* origLink = splicePtr->next;
+            splicePtr->next = splicePtr2;
+            while(splicePtr2->next != nullptr){
+                splicePtr2 = splicePtr2->next;
+            }
+            splicePtr2->next = origLink;
+        } else { splicePtr = splicePtr2; }
+    }
+}
+
+
+
+bool isSublist(Node* subHead, Node* origHead){
+    Node* ptr1 = subHead;
+    Node* ptr2 = origHead;
+
+
+    if (subHead == nullptr && origHead == nullptr){
+        return true;
+    }
+
+    if ( subHead == nullptr || (subHead != nullptr && origHead == nullptr)){
+        return false;
+    }
+
+
+    while (origHead != nullptr) {
+        ptr2 = origHead;
+        
+        while (ptr1 != nullptr){
+            if (ptr2 == nullptr){
+                return false;
+            }
+            else if (ptr1->data == ptr2->data){
+                ptr1 = ptr1->next;
+                ptr2 = ptr2->next;
+            }
+            else{
+                break;
+            }
+        }
+        
+        if (ptr1 == nullptr){
+            return true;
+        }
+
+        ptr1 = subHead;
+
+        origHead = origHead->next;
+    }
+    return false;
+}
+
+bool findList(Node* first, Node* second)
+{
+    Node* ptr1 = first, *ptr2 = second;
+    
+    // If both linked lists are empty, return true
+    if (first == NULL && second == NULL)
+        return true;
+    
+    // Else If one is empty and other is not return
+    // false
+    if ( first == NULL ||
+        (first != NULL && second == NULL))
+        return false;
+    
+    // Traverse the second list by picking nodes
+    // one by one
+    while (second != NULL)
+    {
+        // Initialize ptr2 with current node of second
+        ptr2 = second;
+        
+        // Start matching first list with second list
+        while (ptr1 != NULL)
+        {
+            // If second list becomes empty and first
+            // not then return false
+            if (ptr2 == NULL)
+                return false;
+            
+            // If data part is same, go to next
+            // of both lists
+            else if (ptr1->data == ptr2->data)
+            {
+                ptr1 = ptr1->next;
+                ptr2 = ptr2->next;
+            }
+            
+            // If not equal then  break the loop
+            else break;
+        }
+        
+        // Return true if first list gets traversed
+        // completely that means it is matched.
+        if (ptr1 == NULL)
+            return true;
+        
+        // Initialize ptr1 with first again
+        ptr1 = first;
+        
+        // And go to next node of second list
+        second = second->next;
+    }
+    
+    return false;
+}
+
+int main() {
+    cout << "\n\nPart One:\n";
+    Node* myList = new Node(5);
+    Node* cursor = myList;
+    cursor->next = new Node(7);
+    cursor = cursor->next;
+    cursor->next = new Node(9);
+    cursor = cursor->next;
+    cursor->next = new Node(1);
+    Node* myList2 = new Node(6);
+    Node* cursor2 = myList2;
+    cursor2->next = new Node(3);
+    cursor2 = myList2->next;
+    cursor2->next = new Node(2);
+    cout << "Before splice:\n\nL1: ";
+    cursor = myList;
+    while(cursor != nullptr) {
+        cout << cursor->data << ' ';
+        cursor = cursor->next;
+    }
+    cout << "\nL2: ";
+    cursor = myList2;
+    while (cursor!= nullptr){
+        cout << cursor->data << ' ';
+        cursor = cursor->next;
+    }
+    cout << endl;
+
+    splice(myList->next,myList2);
+    cursor = myList;
+    cout << "\n\nSplicing L2 at target in L1\n\nL1: ";
+    while(cursor != nullptr) {
+        cout << cursor->data << ' ';
+        cursor = cursor->next;
+    }
+    cout << "\nL2: ";
+    cursor = myList2;
+    while (cursor!= nullptr){
+        cout << cursor->data << ' ';
+        cursor = cursor->next;
+    }
+    cout << endl;
+    cout << "============================";
+  
+    cout << "\n\nPart Two:\n";
+    
+    Node *a = new Node(2);
+    a->next = new Node(4);
+    a->next->next = new Node(5);
+    a->next->next->next = new Node(6);
+    
+    Node *b = new Node(1);
+    b->next = new Node(2);
+    b->next->next = new Node(3);
+    b->next->next->next = new Node(2);
+    b->next->next->next->next = new Node(3);
+    b->next->next->next->next->next = new Node(2);
+    b->next->next->next->next->next->next = new Node(4);
+    b->next->next->next->next->next->next->next = new Node(5);
+    b->next->next->next->next->next->next->next->next = new Node(6);
+    
+    if(isSublist(a,b) == true){
+        cout << "LIST FOUND" << endl;
+        while (b!= nullptr){
+            cout << b->data << ' ';
+            b = b->next;
+        }
+        cout << endl;
+    } else {
+        cout << "Failed to match"<< endl;
+    }
+}
