@@ -1,0 +1,165 @@
+//  Rabiya Sharieff
+//
+// Models a game of medieval times with warriors getting their strength form their
+// weapons and data from warriors class being hidden from users
+
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <ostream>
+
+using namespace std;
+
+class Warrior {
+    
+    // nested weapon class- only for use by warrior obj
+    class Weapon {
+    public:
+        // weapon constructor
+        Weapon(const string& theName, int theStrength)
+        : weaponName(theName), strength(theStrength) {}
+        
+        // prints weapon details
+        void display() const {
+            cout << "weapon: " << weaponName << ", " << strength << endl;
+        }
+    
+        int wStrength (){
+            return strength;
+        }
+        void updateWeaponStrength( int newStrength){
+            strength -= newStrength;
+        }
+        
+    private:
+        string weaponName;
+        int strength;
+    };
+    
+    
+public:
+    // Warrior constructor
+    Warrior(const string& warName, const string& wpName, int wpStrength)
+    : warriorName(warName), warWeapon( wpName, wpStrength) {}
+    
+    // Prints Warrior and weapon information
+    void display() const {
+        cout << "Warrior " << warriorName << ", ";
+        warWeapon.display();
+    }
+    //returns Warrior weapon strength - getter method
+    int weaponStrength() {
+        return warWeapon.wStrength();
+    }
+    //updates Warrior weapon strength to passed in value - setter method
+    void updateStrength(int newStrength){
+        warWeapon.updateWeaponStrength(newStrength);
+    }
+    bool isName(const string& name) const {
+        return warriorName == name;
+    }
+    
+private:
+    string warriorName;
+    Weapon warWeapon;
+    
+};
+
+
+// returns location of warrior in Warriors vector
+size_t findWarrior(const vector<Warrior>& Warriors, const string& figther) {
+    for (int i = 0; i < Warriors.size(); i++) {
+        if (Warriors[i].isName(figther)) {
+            return i;
+        }
+    }
+    return Warriors.size();
+}
+
+// list all warriors and weapon infos
+void Status(vector<Warrior>& Warriors) {
+    cout << "There are: " << Warriors.size() << " warriors" << endl;
+    for (const Warrior& figther : Warriors){
+        figther.display();
+
+    }
+}
+
+void Battle(vector<Warrior>& Warriors, const string& fighter1, const string& fighter2){
+    size_t location1 = findWarrior(Warriors, fighter1);
+    size_t location2 = findWarrior(Warriors, fighter2);
+    //cout << Warriors[location1].warriorName << " battles " << Warriors[location2].warriorName << endl;
+    
+    if (Warriors[location1].weaponStrength() == 0 && Warriors[location2].weaponStrength() ==0) {
+        cout << fighter1 << " battles " << fighter2 << endl;
+        cout << "Oh, NO! They're both dead! Yuck!\n";
+    }
+    else if (Warriors[location1].weaponStrength() == Warriors[location2].weaponStrength()){
+        cout << fighter1 << " battles " << fighter2 << endl;
+        cout << "Mutual Annihilation: " << fighter1 << " and " << fighter2;
+        cout << " die at each other's hands\n";
+        Warriors[location1].updateStrength(Warriors[location1].weaponStrength());
+        Warriors[location2].updateStrength(Warriors[location2].weaponStrength());
+    }
+    else if (Warriors[location1].weaponStrength() == 0) {
+       cout << "He's dead, " << fighter2 << endl;
+    }
+    else if (Warriors[location2].weaponStrength() == 0) {
+        cout << fighter1 << " battles " << fighter2 << endl;
+        cout << "He's dead, " << fighter1 << endl;
+    }
+    
+    else if (Warriors[location1].weaponStrength() >  Warriors[location2].weaponStrength()){
+        cout << fighter1 << " battles " << fighter2 << endl;
+        Warriors[location1].updateStrength(Warriors[location2].weaponStrength());
+        Warriors[location2].updateStrength(Warriors[location2].weaponStrength());
+        cout << fighter1 << " defeats " << fighter2 << endl;
+        
+    }
+    else if (Warriors[location2].weaponStrength() >  Warriors[location1].weaponStrength()){
+        cout << fighter1 << " battles " << fighter2 << endl;
+        Warriors[location2].updateStrength(Warriors[location1].weaponStrength());
+        Warriors[location1].updateStrength(Warriors[location1].weaponStrength());
+        cout << fighter2 << " defeats " << fighter1 << endl;
+    }
+    cout << endl;
+    
+}
+
+
+int main() {
+    ifstream stream;
+    stream.open("warriors.txt");
+    while (!stream) {
+        cerr << "failed to open " << "warriors.txt";
+        exit(1);
+    }
+    
+    vector <Warrior> Warriors;
+    
+    string command;
+  
+    
+    while ( stream >> command) {
+        if ( command == "Warrior"){
+            string name;
+            int wpStrength;
+            string wpName;
+            stream >> name >> wpName >> wpStrength;
+            Warriors.push_back(Warrior(name, wpName, wpStrength));
+        }
+    
+        else if ( command == "Status"){
+            Status(Warriors);
+        }
+        else if ( command == "Battle") {
+            string figther1;
+            string fighter2;
+            stream >> figther1 >> fighter2;
+            Battle(Warriors, figther1, fighter2);
+        }
+        cout << endl;
+    }
+    
+}
