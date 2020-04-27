@@ -1,0 +1,282 @@
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+
+
+class Instrument {
+public:
+    virtual void makeSound() const = 0 ;
+    virtual void play() const = 0;
+    
+};
+
+
+
+class Percussion : public Instrument {
+public:
+    Percussion() {}
+    void makeSound() const {
+        cout << "To make a sound... hit me!\n";
+    }
+};
+
+class Drum : public Percussion {
+public:
+    Drum() : Percussion() {}
+    void play() const { cout << "Boom"; }
+};
+
+class Cymbal : public Percussion {
+public:
+    Cymbal() : Percussion() {}
+    void play() const { cout << "Crash"; }
+};
+
+
+
+
+class String : public Instrument {
+private:
+    unsigned pitch;
+public:
+    String(unsigned thePitch) : pitch(thePitch) {}
+    void makeSound() const {
+        cout << "To make a sound... bow a string with pitch " << pitch << endl;
+    }
+};
+
+class Cello : public String {
+private:
+    
+public:
+    Cello(unsigned thePitch) : String(thePitch) {}
+    void play() const { cout << "Squawk"; }
+};
+
+class Violin : public String {
+public:
+    Violin(unsigned thePitch) : String(thePitch) {}
+    void play() const { cout << "Screech"; }
+};
+
+
+
+
+
+class Brass : public Instrument {
+private:
+    unsigned size;
+public:
+    Brass(unsigned mouthpiece) {
+        if (mouthpiece == 4 || mouthpiece == 9 || mouthpiece == 12){
+            size = mouthpiece;
+        } else {
+            cerr << "Mouthpiece not correct size\n";
+            exit(1);
+        }
+    }
+    virtual void makeSound() const {
+        cout << "To make a sound... blow on a mouthpiece of size " << size;
+        cout << endl;
+    }
+};
+
+class Trombone : public Brass {
+private:
+public:
+    Trombone(unsigned mouthpiece) : Brass(mouthpiece) {}
+    void play() const { cout << "Blat"; }
+};
+
+class Trumpet : public Brass {
+private:
+public:
+    Trumpet(unsigned mouthpiece) : Brass(mouthpiece) {}
+    void play() const { cout << "Toot"; }
+};
+
+
+
+
+
+class MILL{
+private:
+    vector<Instrument*> bin;
+public:
+
+    MILL() {}
+    void receiveInstr(Instrument& newInst) {
+        //test
+       // newInst.makeSound();
+        for(size_t i = 0; i < bin.size(); i++){
+            if(bin[i]==nullptr){
+                bin[i] = &newInst;
+                return;
+            }
+        }
+        bin.push_back(&newInst);
+    }
+    void dailyTestPlay() const {
+        for(size_t i = 0; i < bin.size(); i++){
+            if (bin[i] != nullptr){
+                bin[i]->makeSound();
+            }
+        }
+    }
+    Instrument* loanOut() {
+        for (size_t i = 0; i < bin.size(); i++){
+            if (bin[i] != nullptr) {
+                Instrument* loaner = bin[i];
+                bin[i] = nullptr;
+                return loaner;
+            }
+        }
+        return nullptr;
+    }
+};
+
+
+
+class Musician {
+public:
+    Musician() : instr(nullptr) {}
+    
+    void acceptInstr(Instrument* instPtr) { instr = instPtr; }
+    
+    Instrument* giveBackInstr() {
+        Instrument* result(instr);
+        instr = nullptr;
+        return result;
+    }
+    
+    void testPlay() const {
+        if (instr) instr->makeSound();
+        else cerr << "have no instr\n";
+    }
+    void playInstr() const {
+        if (instr) instr->play();
+    }
+    
+private:
+    Instrument* instr;
+};
+
+
+
+class Orch{
+private:
+    vector<Musician*> musicians;
+public:
+    Orch() {}
+    void addPlayer(Musician& newMusician){
+        for(size_t i = 0; i < musicians.size(); i++){
+            if(musicians[i] == nullptr){
+                musicians[i] = &newMusician;
+                return;
+            }
+        }
+        if (musicians.size() == 25){
+            cout << "Can't have an orchestra > 25 people\n";
+            return;
+        }
+        musicians.push_back(&newMusician);
+    }
+    
+    void play() const {
+        for (size_t i = 0; i < musicians.size(); i++){
+            musicians[i]->playInstr();
+        }
+        cout << endl;
+    }
+    
+};
+
+// PART TWO
+int main() {
+    // The initialization phase
+    
+    Drum drum;
+    Cello cello(673);
+    Cymbal cymbal;
+    Trombone tbone(4);
+    Trumpet trpt(12);
+    Violin violin(567);
+    
+    MILL mill;
+    mill.receiveInstr(trpt);
+    mill.receiveInstr(violin);
+    mill.receiveInstr(tbone);
+    mill.receiveInstr(drum);
+    mill.receiveInstr(cello);
+    mill.receiveInstr(cymbal);
+    
+    Musician bob;
+    Musician sue;
+    Musician mary;
+    Musician ralph;
+    Musician jody;
+    Musician morgan;
+    
+    Orch orch;
+    
+    // THE SCENARIO
+    
+    //Bob joins the orchestra without an instrument.
+    orch.addPlayer(bob);
+    
+    //The orchestra performs
+    cout << "orch performs\n";
+    orch.play();
+    
+    //Sue gets an instrument from the MIL2 and joins the orchestra.
+    sue.acceptInstr(mill.loanOut());
+    orch.addPlayer(sue);
+    
+    //Ralph gets an instrument from the MIL2.
+    ralph.acceptInstr(mill.loanOut());
+    
+    //Mary gets an instrument from the MIL2 and joins the orchestra.
+    mary.acceptInstr(mill.loanOut());
+    orch.addPlayer(mary);
+    
+    //Ralph returns his instrument to the MIL2.
+    mill.receiveInstr(*ralph.giveBackInstr());
+    
+    //Jody gets an instrument from the MIL2 and joins the orchestra.
+    jody.acceptInstr(mill.loanOut());
+    orch.addPlayer(jody);
+    
+    // morgan gets an instrument from the MIL2
+    morgan.acceptInstr(mill.loanOut());
+    
+    //The orchestra performs.
+    cout << "orch performs\n";
+    orch.play();
+    
+    //Ralph joins the orchestra.
+    orch.addPlayer(ralph);
+    
+    //The orchestra performs.
+    cout << "orch performs\n";
+    orch.play();
+    
+    // bob gets an instrument from the MIL2
+    bob.acceptInstr(mill.loanOut());
+    
+    // ralph gets an instrument from the MIL2
+    ralph.acceptInstr(mill.loanOut());
+    
+    //The orchestra performs.
+    cout << "orch performs\n";
+    orch.play();
+    
+    //Morgan joins the orchestra.
+    orch.addPlayer(morgan);
+    
+    //The orchestra performs.
+    cout << "orch performs\n";
+    orch.play();
+    
+} // main
