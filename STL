@@ -1,0 +1,314 @@
+// Rabiya Sharieff
+
+
+#include <iostream>
+#include <fstream>
+#include <vector>      // task 1
+#include <list>        // task 2
+#include <algorithm>   // task 3
+#include <string>      // task 21
+#include <set>         // task 22
+#include <map>         // task 23
+using namespace std;
+
+// Task 9 - print List
+void printList(const list<int>& inList){
+    for(list<int>::const_iterator p = inList.begin(); p != inList.end(); p++){
+        cout << *p << ' ';
+    }
+}
+
+// Task 10 - print List - Ranged For
+void printListRanged(const list<int>& inList){
+    for(int mInt : inList){
+        cout << mInt << ' ';
+    }
+    cout << endl;
+}
+
+// Task 11 - print List - Auto
+void printListAuto(const list<int>& inList){
+    for(auto p = inList.begin(); p != inList.end(); p++){
+        cout << *p << ' ';
+    }
+    cout << endl;
+}
+
+// Task 12 - find an item
+list<int>::const_iterator findInt(const list<int>& inList, int find){
+    for(list<int>::const_iterator p = inList.begin(); p != inList.end(); p++){
+        if(*p == find){
+            return p;
+        }
+    }
+    return list<int>::const_iterator(inList.end());
+}
+
+// Task 13 - find an item - Auto
+auto findIntAuto(const list<int>& inList, int find){
+    for (auto p = inList.begin(); p != inList.end(); p++){
+        if(*p == find){
+            return p;
+        }
+    }
+    return inList.end();
+}
+
+// Task 15 - find_if - function
+bool hey(int p){
+    return p % 2 == 0;
+}
+
+// Task 16 - find if - functor
+struct isEven{
+    bool operator() (int n) { return n % 2 == 0; }
+};
+
+// Task 19 - templated functions
+list<int>::const_iterator ourFind(    const list<int>::iterator& first,
+                                    const list<int>::iterator& last,
+                                    int value) {
+    list<int>::const_iterator p = first;
+    while(p != last){
+        if(*p == value){
+            return p;
+        }
+        p++;
+    }
+    return last;
+}
+
+// Task 20 - templated functions with an actual template
+template<typename T, typename U>
+T ourFind(const T& first, const T& last, U value) {
+    for (T p = first; p != last; p++){
+        if(*p == value) { return p; }
+    } return last;
+}
+
+
+int main() {
+    // 1. Create a vector with some values and display using ranged for
+    cout << "Task 1:\n";
+    vector<int> intV {4,6,12,16,1,10,0,3,19,17,13,2,5,11,14,9,18,7,15,8};
+    for(int myInt : intV){
+        cout << myInt << ' ';
+    }
+    cout << "\n=======\n";
+
+    // 2. Initalize a list as a copy of values from the vector
+    cout << "Task 2:\n";
+    list<int> intList(intV.begin(), intV.end());
+    for(int myInt: intList){
+        cout << myInt << ' ';
+    }
+    cout << "\n=======\n";
+
+    // 3. Sort the original vector.  Display both the vector and the list
+    cout << "Task 3:\n";
+    sort(intV.begin(), intV.end());
+    for(int myInt : intV){
+        cout << myInt << ' ';
+    }
+    cout << "\n=======\n";
+
+    // 4. print every other element of the vector.
+    cout << "Task 4:\n";
+    for(int i = 0; i < intV.size(); i+=2){
+        cout << intV[i] << ' ';
+    }
+    cout << "\n=======\n";
+
+    // 5. Attempt to print every other element of the list using the
+    //    same technique.
+    cout << "Task 5:\n";
+    // for (int i = 0; i < intList.size(); i += 2){
+    //     cout << intList[i] << ' ';
+    // }
+    cout << "\n=======\n";
+
+    //
+    // Iterators
+    //
+
+    // 6. Repeat task 4 using iterators.  Do not use auto;
+    cout << "Task 6:\n";
+    for(vector<int>::iterator p = intV.begin(); p != intV.end(); p+=2){
+        cout << *p << ' ';
+    }
+    cout << "\n=======\n";
+
+    // 7. Repeat the previous task using the list.  Again, do not use auto.
+    //    Note that you cannot use the same simple mechanism to bump
+    //    the iterator as in task 6.
+    cout << "Task 7:\n";
+    for(list<int>::iterator p = intList.begin(); p != intList.end(); p++){
+          cout << *p << ' ';
+          p++;
+      }
+
+    cout << "\n=======\n";
+
+    // 8. Sorting a list
+    cout << "Task 8:\n";
+    intList.sort();
+    for(list<int>::iterator p = intList.begin(); p != intList.end(); p++){
+        cout << *p << ' ';
+        p++;
+    }
+    cout << "\n=======\n";
+
+    // 9. Calling the function to print the list
+    cout << "Task 9:\n";
+    printList(intList);
+    cout << "=======\n";
+
+    // 10. Calling the function that prints the list, using ranged-for
+    cout << "Task 10:\n";
+    printListRanged(intList);
+    cout << "=======\n";
+
+    //
+    // Auto
+    //
+
+    // 11. Calling the function that, using auto, prints alterate
+    // items in the list
+    cout << "Task 11:\n";
+    printListAuto(intList);
+    cout << "=======\n";
+
+    
+    // 12.  Write a function find that takes a list and value to search for.
+    //      What should we return if not found
+    cout << "Task 12:\n";
+    list<int>::const_iterator p = findInt(intList, 42);
+       cout << *p << endl;
+
+    cout << "=======\n";
+
+    // 13.  Write a function find that takes a list and value to search for.
+    //      What should we return if not found
+    cout << "Task 13:\n";
+    list<int>::const_iterator secondP = findIntAuto(intList, 42);
+    cout << *secondP << endl;
+    cout << "=======\n";
+
+    //
+    // Generic Algorithms
+    //
+
+    // 14. Generic algorithms: find
+    cout << "Task 14:\n";
+    list<int>::iterator thirdP = find(intList.begin(), intList.end(), 4);
+    cout << *thirdP << endl;
+
+    cout << "=======\n";
+
+    // 15. Generic algorithms: find_if
+    cout << "Task 15:\n";
+    list<int>::iterator fourthP = find_if(intList.begin(), intList.end(), hey);
+    cout << *fourthP << endl;
+    cout << "=======\n";
+
+    // 16. Functor
+    cout << "Task 16:\n";
+    cout << *find_if(intList.begin(), intList.end(), isEven()) << endl;
+    cout << "=======\n";
+    
+    // 17. Lambda
+    cout << "Task 17:\n";
+    cout << *find_if(intList.begin(), intList.end(), [] (int a) { return a % 2 == 0; }) << endl;
+    cout << "=======\n";
+
+    // 18. Generic algorithms: copy to an array
+    cout << "Task 18:\n";
+    int arr[20];
+    copy(intList.begin(), intList.end(), arr);
+    for(int intV : arr){
+        cout << intV << ' ';
+    }
+    cout << endl;
+
+    cout << "=======\n";
+
+    //
+    // Templated Functions
+    //
+
+    // 19. Implement find as a function for lists
+    cout << "Task 19:\n";
+    cout << *ourFind(intList.begin(), intList.end(), 13) << endl;
+    cout << "=======\n";
+    
+    // 20. Implement find as a templated function
+    cout << "Task 20:\n";
+    cout << *ourFind(intV.begin(), intV.end(), 17) << endl;
+    cout << "=======\n";
+
+    //
+    // Associative collections
+    //
+
+    // 21. Using a vector of strings, print a line showing the number
+    //     of distinct words and the words themselves.
+    cout << "Task 21:\n";
+    cout << "Task 21:\n";
+
+       ifstream ifs("pooh-nopunc.txt");
+       if(!ifs){
+           cerr << "File not found\n";
+           exit(1);
+       }
+       vector<string> distinctWords;
+       string word;
+       while(ifs >> word) {
+           if(find(distinctWords.begin(), distinctWords.end(), word) == distinctWords.end()){
+               distinctWords.push_back(word);
+           }
+       }
+       for(const string& aWord : distinctWords){
+           cout << aWord << ' ';
+       }
+       cout << distinctWords.size() << endl;
+
+    cout << "\n=======\n";
+
+    // 22. Repeating previous step, but using the set
+    cout << "Task 22:\n";
+    set<string> mySet;
+       ifs.clear();
+       ifs.seekg(0);
+       while(ifs >> word){
+           mySet.insert(word);
+       }
+       for(const string& aWord: mySet){
+           cout << aWord << ' ';
+       }
+       cout << mySet.size() << endl;
+
+
+    cout << "=======\n";
+
+    // 23. Word co-occurence using map
+    cout << "Task 23:\n";
+    map<string, vector<int>> wordMap;
+    ifs.clear();
+    ifs.seekg(0);
+    int count = 0;
+    while(ifs >> word){
+        wordMap[word].push_back(count);
+        count++;
+    }
+    for(auto p = wordMap.begin(); p != wordMap.end(); p++){
+        cout << p->first << ": ";
+        for(int i = 0; i < p->second.size(); i++){
+            cout << p->second[i] << ' ';
+        }
+        cout << endl;
+    }
+
+    cout << "=======\n";
+}
+
+
