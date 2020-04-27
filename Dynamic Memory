@@ -1,0 +1,374 @@
+/*
+ Rabiya Sharief
+ There are Nobles and Warriors. Nobles can hire Warriors and battle other
+ Nobles. This program  of a medevil world demonstrates dynamic memory through
+ the use of heapsand error handling.
+ */
+
+
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+class Warrior {
+    friend ostream& operator<<( ostream& os, const Warrior& warrior){
+        os << warrior.name << ": " << warrior.strength;
+        return os;
+    }
+    
+public:
+    // constructor
+    Warrior(const string& warriorName, int warriorStrength)
+    : name(warriorName), strength(warriorStrength), hired(false) {}
+    
+    // getter methods for warriors
+    const string& getName() const {
+        return name;
+    }
+    int getStrength() const {
+        return strength;
+    }
+    bool getHired() const {
+        return hired;
+    }
+    
+    // setter methods for warriors
+    void setStrength(int newStrength) {
+        strength = newStrength;
+    }
+    void setHired(bool newHired) {
+        hired = newHired;
+    }
+private:
+    string name;
+    int strength;
+    bool hired;
+    
+};
+
+
+class Noble {
+    friend ostream& operator<<(ostream& os, const Noble& noble) {
+        os << noble.name << " has an army of " << noble.army.size() << endl;
+        for (size_t i = 0; i < noble.army.size(); i++) {
+            os << "     " << *noble.army[i] << endl;
+        }
+        return os;
+    }
+    
+public:
+    // constructor
+    Noble(const string& nName) : name(nName) {
+        dead = false;
+        armyStrength = 0;
+    }
+    
+    // getter methods for noble
+    int getArmyStrength() const {
+        return armyStrength;
+    }
+    const string& getName() const {
+        return name;
+    }
+    const vector<Warrior*>& getArmy() const {
+        return army;
+    }
+    bool getDead() const {
+        return dead;
+    }
+    // setter methods for noble
+    void setArmyStrength(int newStrength) {
+        // loop through warriors' strengths and change to newStrength
+        // and then set the new total armyStrength
+        armyStrength = 0;
+        for (size_t i = 0; i < army.size(); i++) {
+            army[i]->setStrength(newStrength);
+            armyStrength += army[i]->getStrength();
+        }
+        // called when noble is dead during battle
+        if (armyStrength == 0) {
+            dead = true;
+        }
+    }
+    // other methods
+    bool hire(Warrior& warrior) {
+        // if the Noble is dead or the Warrior is hired
+        if (dead || warrior.getHired()) {
+            return false;
+        }
+        warrior.setHired(true);
+        army.push_back(&warrior);
+        armyStrength += warrior.getStrength();
+        return true;
+    }
+    bool fire(Warrior& warrior) {
+        // if the Noble is dead or the Warrior is not part of the army
+        if (dead || !warrior.getHired()) {
+            return false;
+        }
+        for (size_t ind = 0; ind < army.size(); ind++) {
+            if (army[ind] == &warrior) {
+                warrior.setHired(false);
+                // make each index of the vector point to the next Warrior
+                // starting at i
+                for (size_t ind2 = 0; ind2 < army.size() - ind - 1; ind2++) {
+                    army[ind2] = army[ind2 + 1];
+                }
+                army.pop_back(); // remove the last element from the vector
+                armyStrength -= warrior.getStrength();
+                cout << "You don't work for me anymore "
+                << warrior.getName() << "! -- "
+                << name << '.' << endl;
+                return true;
+                
+            }
+        }
+        return false;
+    }
+    void battle(Noble& noble) {
+        cout << this->getName() << " battles " << noble.getName() << endl;
+        int nobleStrength = noble.getArmyStrength();
+        // if both Nobles are dead
+        if (dead && noble.getDead()) {
+            cout << "Oh, NO! They're both dead! Yuck!" << endl;
+        }
+        // if only this Noble is dead
+        else if (armyStrength == 0) {
+            cout << "He's dead, " << noble.getName() << endl;
+        }
+        // if only the other Noble is dead
+        else if (nobleStrength == 0) {
+            cout << "He's dead, " << this->getName() << endl;
+        }
+        // if both Nobles are alive
+        else {
+            // if this Noble is stronger than the other Noble
+            if (armyStrength > nobleStrength) {
+                this->setArmyStrength((int) ((armyStrength - nobleStrength) / army.size()));
+                noble.setArmyStrength(0);
+                cout << name << " defeats " << noble.getName() << endl;
+            }
+            // if the other Noble is stronger than this Noble
+            else if (armyStrength < nobleStrength) {
+                noble.setArmyStrength((int) ((nobleStrength - armyStrength) / noble.getArmy().size()));
+                this->setArmyStrength(0);
+                cout << noble.getName() << " defeats " << name;
+            }
+            // if both Nobles are of equal strength
+            else {
+                noble.setArmyStrength(0);
+                this->setArmyStrength(0);
+                cout << "Mutual Annihilation: " << name << " and "
+                << noble.getName() << " die at each other's hands" << endl;
+            }
+        }
+    }
+private:
+    string name;
+    vector<Warrior*> army;
+    int armyStrength;
+    bool dead;
+};
+
+void createNoble(ifstream& file, vector<Noble*>& nobles) {
+    string name;
+    file >> name;
+    for (size_t i = 0; i < nobles.size(); i++) {
+        // Error handling - if the Noble already exists
+        if (nobles[i]->getName() == name) {
+            cout << "A Noble of name " << name
+            << " already exists." << endl;
+            cout << "This program will continue on." << endl;
+            return;
+        }
+    }
+    Noble* noble = new Noble(name);
+    nobles.push_back(noble);
+}
+void createWarrior(ifstream& file, vector<Warrior*>& warriors) {
+    string name;
+    int strength;
+    file >> name >> strength;
+    for (size_t i = 0; i < warriors.size(); i++) {
+        // Error handling - if the Warrior already exists
+        if (warriors[i]->getName() == name) {
+            cout << "A Warrior of name " << name
+            << " already exists." << endl;
+            cout << "This program will continue on." << endl;
+            return;
+        }
+    }
+    Warrior* warrior = new Warrior(name, strength);
+    warriors.push_back(warrior);
+}
+void nobleStatus(ifstream& file, const vector<Noble*>& nobles,
+              const vector<Warrior*>& warriors, const string& command) {
+    string nobleName;
+    string warriorName;
+    Noble* noble = nullptr;
+    Warrior* warrior = nullptr;
+    file >> nobleName >> warriorName;
+    for (size_t ind = 0; ind < nobles.size(); ind++) {
+        if (nobles[ind]->getName() == nobleName) {
+            noble = nobles[ind];
+            break;
+        }
+    }
+    for (size_t ind = 0; ind < warriors.size(); ind++) {
+        if (warriors[ind]->getName() == warriorName) {
+            warrior = warriors[ind];
+            break;
+        }
+    }
+    // Error handling - if Noble or Warrior does not exist
+    if (noble == nullptr || warrior == nullptr) {
+        cout << "A Noble or Warrior does not exist." << endl;
+        cout << "This program will continue." << endl;
+        return;
+    }
+    if (command == "hire") {
+        if (!warrior->getHired()) {
+            noble->hire(*warrior);
+            warrior->setHired(true);
+        }
+        else {
+            return;
+        }
+    }
+    if (command == "fire") {
+        if (!warrior->getHired()) {
+            return;
+        }
+        else {
+            noble->fire(*warrior);
+            warrior->setHired(false);
+        }
+    }
+}
+void nobleBattle(ifstream& file,
+                 const vector<Noble*>& nobles) {
+    string noble1;
+    string noble2;
+    file >> noble1 >> noble2;
+    Noble* noble = nullptr;
+    Noble* challenger = nullptr;
+    for (size_t ind = 0; ind < nobles.size(); ind++) {
+        if (nobles[ind]->getName() == noble1) {
+            noble = nobles[ind];
+        }
+        if (nobles[ind]->getName() == noble2) {
+            challenger = nobles[ind];
+        }
+    }
+    // Error handling - if one of the Nobles does not exist
+    if (noble == nullptr || challenger == nullptr) {
+        cout << "One of the Nobles does not exist." << endl;
+        cout << "This program will continue on." << endl;
+        return;
+    }
+    if (noble != challenger) {
+        noble->battle(*challenger);
+    }
+    // Error handling - if the two Nobles are the same Noble
+    else {
+        cout << "A Noble can't battle himself!" << endl;
+        cout << "This program will continue on." << endl;
+        return;
+    }
+}
+void displayStatus(const vector<Noble*>& nobles,
+                 const vector<Warrior*>& warriors) {
+    cout << "Status" << endl << "======" << endl;
+    cout << "Nobles:" << endl;
+    if (nobles.size() == 0) {
+        cout << "NONE" << endl;
+    }
+    for (size_t ind = 0; ind < nobles.size(); ind++) {
+        cout << *nobles[ind] << endl;
+    }
+    cout << "Unemployed Warriors:" << endl;
+    // number of unemployed Warriors
+    size_t unemployed = 0;
+    for (size_t ind = 0; ind < warriors.size(); ind++) {
+        // print out the unemployed Warriors
+        if (!warriors[ind]->getHired()) {
+            unemployed++;
+            cout << *warriors[ind] << endl;
+        }
+    }
+    if (warriors.size() == 0 || unemployed == 0) {
+        cout << "NONE" << endl;
+    }
+}
+
+
+int main() {
+    ifstream file("nobleWarriors.txt");
+    if (!file) {
+        cerr << "failed to open nobleWarriors" << endl;
+        exit(1);
+    }
+    
+    vector<Noble*> nobles;
+    vector<Warrior*> warriors;
+    
+    string command;
+    while(file >> command) {
+        // create a new Noble
+        if (command == "Noble") {
+            createNoble(file, nobles);
+        }
+        // create a new Warrior
+        else if (command == "Warrior") {
+            createWarrior(file, warriors);
+        }
+        // hire a Warrior
+        else if (command == "Hire") {
+            nobleStatus(file, nobles, warriors, "hire");
+        }
+        // fire a Warrior
+        else if (command == "Fire") {
+            nobleStatus(file, nobles, warriors, "fire");
+        }
+        // let the battle begin!
+        else if (command == "Battle") {
+            nobleBattle(file, nobles);
+        }
+        // check the status
+        else if (command == "Status") {
+            displayStatus(nobles, warriors);
+        }
+        // kill every Noble and Warrior
+        else if (command == "Clear") {
+            for (size_t ind = 0; ind < nobles.size(); ind++) {
+                delete nobles[ind];
+            }
+            for (size_t ind = 0; ind < warriors.size(); ind++) {
+                delete warriors[ind];
+            }
+            nobles.clear();
+            warriors.clear();
+        }
+        // if the command is not any of the valid commands
+        else {
+            cout << command << " is not a valid command." << endl;
+        }
+    }
+    // close file
+    file.close();
+    
+    // top make sure the heap is removed if clear is not called
+    // since the end of the function has been reached
+    for (size_t ind = 0; ind < nobles.size(); ind++) {
+        delete nobles[ind];
+    }
+    nobles.clear();
+    for (size_t ind = 0; ind < warriors.size(); ind++) {
+        delete warriors[ind];
+    }
+    warriors.clear();
+}
+
